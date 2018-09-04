@@ -6,8 +6,13 @@
     <Authors>Sean D Smith</Authors>
     <Company>Ropley IT Ltd</Company>
     <Description>Simple class library that wraps the C# Roslyn compiler, so that a C# string or text stream can be compiled and loaded as a dynamic assembly at runtime.</Description>
-    <Copyright>Ropley Information Technology Ltd</Copyright>
-    <PackageLicenseUrl />
+    <Copyright>Ropley Information Technology Ltd, MIT License</Copyright>
+    <PackageLicenseUrl>https://github.com/RopleyIT/DynamicCSharp/blob/master/README.md</PackageLicenseUrl>
+    <Product>DynamicCSharp dynamic assembly generator and loader for .NET Core 2.1</Product>
+    <RepositoryUrl>https://github.com/RopleyIT/DynamicCSharp</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/RopleyIT/DynamicCSharp</PackageProjectUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageTags />
   </PropertyGroup>
 
   <ItemGroup>
