@@ -3,9 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2003
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicCSharp", "DynamicCSharp\DynamicCSharp.csproj", "{5234F0EE-FEF4-48CD-B311-8CF077819A73}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DynamicCSharp", "DynamicCSharp\DynamicCSharp.csproj", "{5234F0EE-FEF4-48CD-B311-8CF077819A73}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicCSharpTests", "DynamicCSharpTests\DynamicCSharpTests.csproj", "{BEA418A1-0EFC-4F3B-AF1B-F446697F1C00}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DynamicCSharpTests", "DynamicCSharpTests\DynamicCSharpTests.csproj", "{BEA418A1-0EFC-4F3B-AF1B-F446697F1C00}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{40382A28-B789-4E9E-A312-7FDC2F7A1965}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
