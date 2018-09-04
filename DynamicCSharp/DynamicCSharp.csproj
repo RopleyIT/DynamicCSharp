@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Sean D Smith</Authors>
+    <Company>Ropley IT Ltd</Company>
+    <Description>Simple class library that wraps the C# Roslyn compiler, so that a C# string or text stream can be compiled and loaded as a dynamic assembly at runtime.</Description>
+    <Copyright>Ropley Information Technology Ltd</Copyright>
+    <PackageLicenseUrl />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="2.9.0" />
+  </ItemGroup>
+
+</Project>
