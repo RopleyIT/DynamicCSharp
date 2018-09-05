@@ -75,8 +75,8 @@ of other types.
 These references should be set up prior to compilation using
 one of three methods of the `ICompiler` interface:
 
-|Method|Description|
-|------|-----------|
+| Method | Description |
+| --- | --- |
 |`AddReference (Type t)`|Adds a reference to a specific data type|
 |`AddReference (string typeName)`|Adds a reference to a data type by type name|
 |`AdddReferences (IEnumerable<string> typeNames)`|Adds a set of references to each of the named types in the enumerable|
@@ -101,7 +101,7 @@ The results of the compilation are scattered across a number of
 properties of the `ICompiler` interface as follows:
 
 | Property | Roslyn or other class | Description |
-|----------|-----------------------|-------------|
+| --- | --- | --- |
 | `Assembly` | `Assembly` | The output assembly object, already dynamically loaded into the application |
 | `SyntaxTree` | `SyntaxTree` | The Roslyn syntax tree object for the compilation |
 | `SemanticModel` | `SemanticModel` | The Roslyn semantic analysis object |
