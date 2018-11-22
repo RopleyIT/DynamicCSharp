@@ -96,6 +96,23 @@ namespace DynamicCSharp
         void AddReferences(IEnumerable<string> typeNames);
 
         /// <summary>
+        /// Add a reference to the assembly with 
+        /// the specified file name or path
+        /// </summary>
+        /// <param name="assemblyName">The name of the DLL
+        /// we need to reference</param>
+
+        void AddAssemblyReference(string assemblyName);
+
+        /// <summary>
+        /// Add references to each of a list of assembly file names
+        /// </summary>
+        /// <param name="assemblyNames">The names of each of the assmebly DLLs
+        /// we wish to reference</param>
+
+        void AddAssemblyReferences(IEnumerable<string> assemblyNames);
+
+        /// <summary>
         /// Compile the source code in the Source
         /// property into a loaded dynamic assembly
         /// </summary>

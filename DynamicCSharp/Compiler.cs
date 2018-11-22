@@ -79,8 +79,10 @@ namespace DynamicCSharp
         public IEnumerable<Diagnostic> Diagnostics { get; private set; }
 
         /// <summary>
-        /// Add a reference to the assembly containing
-        /// the definition of the type t
+        /// Add a reference to the assembly containing the
+        /// definition of the type t. The type T must be in
+        /// an assembly that is loaded and known to the
+        /// current application.
         /// </summary>
         /// <param name="t">The type we need to reference</param>
 
@@ -98,7 +100,9 @@ namespace DynamicCSharp
 
         /// <summary>
         /// Add a reference to the assembly containing
-        /// the definition of the type with name typeName
+        /// the definition of the type with name typeName.
+        /// The type T must be in an assembly loaded in the
+        /// currently running application.
         /// </summary>
         /// <param name="typeName">The name of the type
         /// we need to reference</param>
@@ -116,9 +120,61 @@ namespace DynamicCSharp
 
         public void AddReferences(IEnumerable<string> typeNames)
         {
-            if(typeNames != null)
+            if (typeNames != null)
                 foreach (string tn in typeNames)
                     AddReference(tn);
+        }
+
+        private string[] trustedAssemblyPaths = null;
+
+        /// <summary>
+        /// Add a reference to the assembly with 
+        /// the specified file name or path
+        /// </summary>
+        /// <param name="assemblyName">The name of the DLL
+        /// we need to reference</param>
+
+        public void AddAssemblyReference(string assemblyName)
+        {
+            // First search for the assembly among the list of trusted
+            // assemblies alrady known about by the .NET core installation
+
+            if(trustedAssemblyPaths == null)
+                trustedAssemblyPaths = 
+                    ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES"))
+                    .Split(Path.PathSeparator);
+            string assemblyPath = trustedAssemblyPaths
+                .FirstOrDefault(p => string.Compare(assemblyName, 
+                Path.GetFileNameWithoutExtension(p), true) == 0);
+
+            // Now try and load the assembly using the
+            // inbuilt assembly resolution mechanism,
+            // if the assembly was not listed among the
+            // trusted assemblies.
+
+            if (string.IsNullOrEmpty(assemblyPath))
+            {
+
+            }
+                throw new ArgumentException("Assembly path not found in trusted assmeblies");
+            var mdRef = MetadataReference.CreateFromFile(assemblyPath);
+            if (mdRef == null)
+                throw new ArgumentException("Metadata reference not found");
+
+            metaDataReferences.Add(mdRef);
+        }
+
+        /// <summary>
+        /// Add references to each of a list of assembly file names
+        /// </summary>
+        /// <param name="assemblyNames">The names of each of the assmebly DLLs
+        /// we wish to reference</param>
+
+        public void AddAssemblyReferences(IEnumerable<string> assemblyNames)
+        {
+            if(assemblyNames != null)
+                foreach (string an in assemblyNames)
+                    AddAssemblyReference(an);
         }
 
         /// <summary>

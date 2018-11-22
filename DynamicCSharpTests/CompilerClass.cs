@@ -48,7 +48,25 @@ namespace DynamicCSharpTests
         {
             ICompiler c = Compiler.Create();
             c.AssemblyName = "Assem3";
-            c.AddReference("System.Int32");
+            c.AddReference("System.IO.Path");
+            Assert.IsType<Compiler>(c);
+        }
+
+        [Fact]
+        public void AddsAReferenceByAssemblyName()
+        {
+            ICompiler c = Compiler.Create();
+            c.AssemblyName = "Assem3A";
+            c.AddAssemblyReference("System.IO");
+            Assert.IsType<Compiler>(c);
+        }
+
+        [Fact]
+        public void AddsALocalReferenceByAssemblyName()
+        {
+            ICompiler c = Compiler.Create();
+            c.AssemblyName = "Assem3A";
+            c.AddAssemblyReference("DynamicCSharp");
             Assert.IsType<Compiler>(c);
         }
 
@@ -58,6 +76,15 @@ namespace DynamicCSharpTests
             ICompiler c = Compiler.Create();
             c.AssemblyName = "Assem4";
             c.AddReferences(new string[] { "System.Int32", "System.Double", "System.IO.Path" });
+            Assert.IsType<Compiler>(c);
+        }
+
+        [Fact]
+        public void AddsAListOfReferencesByAssemblyName()
+        {
+            ICompiler c = Compiler.Create();
+            c.AssemblyName = "Assem4A";
+            c.AddAssemblyReferences(new string[] { "System", "System.IO", "System.XML" });
             Assert.IsType<Compiler>(c);
         }
 
