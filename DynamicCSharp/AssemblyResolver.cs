@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyModel;
+using Microsoft.Extensions.DependencyModel.Resolution;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.IO;
 using System.Runtime.Loader;
-using Microsoft.Extensions.DependencyModel.Resolution;
-using Microsoft.Extensions.DependencyModel;
 
 namespace DynamicCSharp
 {
@@ -14,7 +14,7 @@ namespace DynamicCSharp
     /// The code below is based on code published by Samuel Cragg on
     /// the CodeProject website, and has been issued under the
     /// CodeProject Open Licence.
-    /// 
+    ///
     /// This class deals with the recursive resolution of assemblies
     /// as each assembly is loaded.
     /// </summary>
@@ -35,7 +35,7 @@ namespace DynamicCSharp
             this.Assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
             this.dependencyContext = DependencyContext.Load(this.Assembly);
 
-            this.assemblyResolver = 
+            this.assemblyResolver =
                 new CompositeCompilationAssemblyResolver
                 (
                     new ICompilationAssemblyResolver[]
@@ -62,7 +62,7 @@ namespace DynamicCSharp
             RuntimeLibrary library =
                 this.dependencyContext.RuntimeLibraries.FirstOrDefault
                 (
-                    (rtl)=> string.Equals(rtl.Name, name.Name, StringComparison.OrdinalIgnoreCase)
+                    (rtl) => string.Equals(rtl.Name, name.Name, StringComparison.OrdinalIgnoreCase)
                 );
 
             if (library != null)

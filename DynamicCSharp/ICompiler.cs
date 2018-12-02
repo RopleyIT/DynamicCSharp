@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Microsoft.CodeAnalysis;
 
 namespace DynamicCSharp
 {
@@ -96,7 +96,7 @@ namespace DynamicCSharp
         void AddReferences(IEnumerable<string> typeNames);
 
         /// <summary>
-        /// Add a reference to the assembly with 
+        /// Add a reference to the assembly with
         /// the specified file name or path
         /// </summary>
         /// <param name="assemblyName">The name of the DLL

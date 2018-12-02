@@ -1,11 +1,10 @@
-﻿using System;
-using System.Linq;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.IO;
-using System.Reflection.Metadata;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.Loader;
 
 namespace DynamicCSharp
@@ -23,10 +22,7 @@ namespace DynamicCSharp
         /// <returns>A new instance of the compiler
         /// expressed through the ICompiler interface</returns>
 
-        public static ICompiler Create()
-        {
-            return new Compiler();
-        }
+        public static ICompiler Create() => new Compiler();
 
         /// <summary>
         /// The assembly generated and loaded from this compilation
@@ -128,7 +124,7 @@ namespace DynamicCSharp
         private string[] trustedAssemblyPaths = null;
 
         /// <summary>
-        /// Add a reference to the assembly with 
+        /// Add a reference to the assembly with
         /// the specified file name or path
         /// </summary>
         /// <param name="assemblyName">The name of the DLL
@@ -139,12 +135,12 @@ namespace DynamicCSharp
             // First search for the assembly among the list of trusted
             // assemblies alrady known about by the .NET core installation
 
-            if(trustedAssemblyPaths == null)
-                trustedAssemblyPaths = 
+            if (trustedAssemblyPaths == null)
+                trustedAssemblyPaths =
                     ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES"))
                     .Split(Path.PathSeparator);
             string assemblyPath = trustedAssemblyPaths
-                .FirstOrDefault(p => string.Compare(assemblyName, 
+                .FirstOrDefault(p => string.Compare(assemblyName,
                 Path.GetFileNameWithoutExtension(p), true) == 0);
 
             // Now try and load the assembly using the
@@ -153,14 +149,10 @@ namespace DynamicCSharp
             // trusted assemblies.
 
             if (string.IsNullOrEmpty(assemblyPath))
-            {
-
-            }
                 throw new ArgumentException("Assembly path not found in trusted assmeblies");
             var mdRef = MetadataReference.CreateFromFile(assemblyPath);
             if (mdRef == null)
                 throw new ArgumentException("Metadata reference not found");
-
             metaDataReferences.Add(mdRef);
         }
 
@@ -172,7 +164,7 @@ namespace DynamicCSharp
 
         public void AddAssemblyReferences(IEnumerable<string> assemblyNames)
         {
-            if(assemblyNames != null)
+            if (assemblyNames != null)
                 foreach (string an in assemblyNames)
                     AddAssemblyReference(an);
         }
@@ -190,7 +182,7 @@ namespace DynamicCSharp
             // SourceStream property is non-null, source code is read
             // from there. Otherwise it comes from the Source property.
 
-            if(SourceStream != null)
+            if (SourceStream != null)
             {
                 using (var ipTextReader = new StreamReader(SourceStream))
                     Source = ipTextReader.ReadToEnd();
@@ -200,7 +192,7 @@ namespace DynamicCSharp
                 throw new InvalidOperationException("No source code to compile");
 
             if (SyntaxTree == null)
-                generateSyntaxTree();
+                GenerateSyntaxTree();
             var options = new CSharpCompilationOptions
                 (
                     OutputKind.DynamicallyLinkedLibrary,
@@ -212,7 +204,7 @@ namespace DynamicCSharp
             SemanticModel = Compilation.GetSemanticModel(SyntaxTree);
             Diagnostics = SemanticModel.GetDiagnostics();
             if (!HasErrors)
-                emitAssembly(dbgMode);
+                EmitAssembly(dbgMode);
         }
 
         /// <summary>
@@ -239,7 +231,7 @@ namespace DynamicCSharp
             metaDataReferences = new List<MetadataReference>();
         }
 
-        private void generateSyntaxTree()
+        private void GenerateSyntaxTree()
         {
             var cSharpVersion = Enum
                 .GetValues(typeof(LanguageVersion))
@@ -250,7 +242,7 @@ namespace DynamicCSharp
             SyntaxTree = CSharpSyntaxTree.ParseText(Source, parseOptions, string.Empty);
         }
 
-        private void emitAssembly(bool dbgMode = false)
+        private void EmitAssembly(bool dbgMode = false)
         {
             using (var outputStream = new MemoryStream())
             {

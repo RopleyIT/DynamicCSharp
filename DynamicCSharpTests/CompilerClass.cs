@@ -1,18 +1,16 @@
-using System;
-using Xunit;
 using DynamicCSharp;
-using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
+using System;
 using System.IO;
+using System.Linq;
+using Xunit;
 
 namespace DynamicCSharpTests
 {
     public class CompilerClass
     {
-        private string source = @"
+        private readonly string source = @"
                 using System;
                 namespace Fred
                 {
@@ -190,7 +188,7 @@ namespace DynamicCSharpTests
             Assert.Equal(2, getNextInt());
         }
 
-        private string badSource = @"
+        private readonly string badSource = @"
                 using System;
                 namespace Fred
                 {
