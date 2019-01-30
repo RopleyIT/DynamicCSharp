@@ -46,7 +46,7 @@ namespace DynamicCSharp
         /// The generated C# syntax tree for this compilation
         /// </summary>
 
-        public SyntaxTree SyntaxTree { get; private set; }
+        public SyntaxTree SyntaxTree { get; set; }
 
         /// <summary>
         /// The input source code to be compiled
@@ -178,21 +178,24 @@ namespace DynamicCSharp
 
         public void Compile(bool dbgMode = false)
         {
-            // Decide where the source code is coming from. If the
-            // SourceStream property is non-null, source code is read
-            // from there. Otherwise it comes from the Source property.
-
-            if (SourceStream != null)
+            if (SyntaxTree == null)
             {
-                using (var ipTextReader = new StreamReader(SourceStream))
-                    Source = ipTextReader.ReadToEnd();
+                // Decide where the source code is coming from. If the
+                // SourceStream property is non-null, source code is read
+                // from there. Otherwise it comes from the Source property.
+
+                if (SourceStream != null)
+                {
+                    using (var ipTextReader = new StreamReader(SourceStream))
+                        Source = ipTextReader.ReadToEnd();
+                }
+
+                if (string.IsNullOrWhiteSpace(Source))
+                    throw new InvalidOperationException("No source code to compile");
+
+                GenerateSyntaxTree();
             }
 
-            if (string.IsNullOrWhiteSpace(Source))
-                throw new InvalidOperationException("No source code to compile");
-
-            if (SyntaxTree == null)
-                GenerateSyntaxTree();
             var options = new CSharpCompilationOptions
                 (
                     OutputKind.DynamicallyLinkedLibrary,

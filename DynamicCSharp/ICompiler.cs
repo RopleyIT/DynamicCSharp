@@ -68,7 +68,7 @@ namespace DynamicCSharp
         /// The generated C# syntax tree for this compilation
         /// </summary>
 
-        SyntaxTree SyntaxTree { get; }
+        SyntaxTree SyntaxTree { get; set;  }
 
         /// <summary>
         /// Add a reference to the assembly containing

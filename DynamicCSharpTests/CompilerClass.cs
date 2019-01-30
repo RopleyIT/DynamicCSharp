@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Xunit;
+using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace DynamicCSharpTests
 {
@@ -23,6 +24,63 @@ namespace DynamicCSharpTests
                         }
                     }
                 }";
+
+        private SyntaxTree CreateSyntaxTree()
+        {
+            var compilationUnit = SF
+                .CompilationUnit()
+                .AddUsings
+                (
+                    SF.UsingDirective
+                        (SF.ParseName("System"))
+                );
+
+            var ns = SF
+                .NamespaceDeclaration(SF.IdentifierName("SynTreeFred"));
+            
+            var cls = SF
+                .ClassDeclaration("Henry")
+                .AddModifiers(SF.Token(SyntaxKind.PublicKeyword));
+
+            // How to define base class and interfaces, with/without generics
+            //
+            //cls = cls.AddBaseListTypes(
+            //    SF.SimpleBaseType(SF.ParseTypeName("Object")),
+            //    SF.SimpleBaseType(SF.ParseTypeName("IEnumerable<string>")));
+
+            var inti = SF
+                .VariableDeclaration(SF.ParseTypeName("int"))
+                .AddVariables
+                (
+                    SF.VariableDeclarator
+                    (
+                        SF.Identifier("i"),
+                        null,
+                        SF.EqualsValueClause
+                        (
+                            SF.LiteralExpression
+                            (
+                                SyntaxKind.NumericLiteralExpression,
+                                SF.Literal(12)
+                            )
+                        )
+                    )
+                );
+
+            var field = SF.FieldDeclaration(inti)
+                .AddModifiers(SF.Token(SyntaxKind.PrivateKeyword));
+
+            var syntax = SF.ParseStatement("return ++i;");
+            var methodDeclaration = SF
+                .MethodDeclaration(SF.ParseTypeName("int"), "GetNextInt")
+                .AddModifiers(SF.Token(SyntaxKind.PublicKeyword))
+                .WithBody(SF.Block(syntax));
+
+            cls = cls.AddMembers(field, methodDeclaration);
+            ns = ns.AddMembers(cls);
+            compilationUnit = compilationUnit.AddMembers(ns);
+            return compilationUnit.SyntaxTree;
+        }
 
         [Fact]
         public void Constructs()
@@ -186,6 +244,23 @@ namespace DynamicCSharpTests
                 .CreateDelegate(typeof(Func<int>), joe, type.GetMethod("GetNextInt"));
             Assert.Equal(1, getNextInt());
             Assert.Equal(2, getNextInt());
+        }
+
+        [Fact]
+        public void CanUseAssemblyFromSyntaxTree()
+        {
+            ICompiler c = Compiler.Create();
+            c.AssemblyName = "Assem13";
+            c.AddReferences(new string[] { "System.Int32", "System.Double", "System.IO.Path" });
+            c.SyntaxTree = CreateSyntaxTree();
+            c.Compile();
+            Type type = c.Assembly.ExportedTypes.Where(t => t.Name == "Henry").FirstOrDefault();
+            var joe = Activator.CreateInstance(type);
+            Assert.IsType(type, joe);
+            var getNextInt = (Func<int>)Delegate
+                .CreateDelegate(typeof(Func<int>), joe, type.GetMethod("GetNextInt"));
+            Assert.Equal(13, getNextInt());
+            Assert.Equal(14, getNextInt());
         }
 
         private readonly string badSource = @"
