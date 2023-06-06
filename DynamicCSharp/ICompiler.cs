@@ -44,6 +44,13 @@ namespace DynamicCSharp
         bool HasErrors { get; }
 
         /// <summary>
+        /// Generate a sequence of error messages palatable for
+        /// reporting in a tool that uses the Dynamic C# library
+        /// </summary>
+
+        IEnumerable<string> Errors { get; }
+
+        /// <summary>
         /// The semantic analysis of this compilation
         /// </summary>
 
@@ -68,7 +75,7 @@ namespace DynamicCSharp
         /// The generated C# syntax tree for this compilation
         /// </summary>
 
-        SyntaxTree SyntaxTree { get; set;  }
+        SyntaxTree SyntaxTree { get; set; }
 
         /// <summary>
         /// Add a reference to the assembly containing

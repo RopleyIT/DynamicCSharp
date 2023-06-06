@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -87,10 +88,9 @@ namespace DynamicCSharp
             if (t == null)
                 throw new ArgumentException("Adding reference to null type");
 
-            var mdRef = MetadataReference.CreateFromFile(t.GetTypeInfo().Assembly.Location);
-            if (mdRef == null)
-                throw new ArgumentException("Metadata reference not found");
-
+            var mdRef = MetadataReference
+                .CreateFromFile(t.GetTypeInfo().Assembly.Location)
+                ?? throw new ArgumentException("Metadata reference not found");
             metaDataReferences.Add(mdRef);
         }
 
@@ -135,9 +135,9 @@ namespace DynamicCSharp
             // First search for the assembly among the list of trusted
             // assemblies alrady known about by the .NET core installation
 
-            if (trustedAssemblyPaths == null)
-                trustedAssemblyPaths =
-                    ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES"))
+            trustedAssemblyPaths ??=
+                    ((string)AppContext
+                    .GetData("TRUSTED_PLATFORM_ASSEMBLIES"))
                     .Split(Path.PathSeparator);
             string assemblyPath = trustedAssemblyPaths
                 .FirstOrDefault(p => string.Compare(assemblyName,
@@ -150,9 +150,8 @@ namespace DynamicCSharp
 
             if (string.IsNullOrEmpty(assemblyPath))
                 throw new ArgumentException("Assembly path not found in trusted assmeblies");
-            var mdRef = MetadataReference.CreateFromFile(assemblyPath);
-            if (mdRef == null)
-                throw new ArgumentException("Metadata reference not found");
+            var mdRef = MetadataReference.CreateFromFile(assemblyPath)
+                ?? throw new ArgumentException("Metadata reference not found");
             metaDataReferences.Add(mdRef);
         }
 
@@ -186,8 +185,8 @@ namespace DynamicCSharp
 
                 if (SourceStream != null)
                 {
-                    using (var ipTextReader = new StreamReader(SourceStream))
-                        Source = ipTextReader.ReadToEnd();
+                    using var ipTextReader = new StreamReader(SourceStream);
+                    Source = ipTextReader.ReadToEnd();
                 }
 
                 if (string.IsNullOrWhiteSpace(Source))
@@ -211,28 +210,49 @@ namespace DynamicCSharp
         }
 
         /// <summary>
-        /// True if the compilation raised any errors
+        /// Generate a sequence of error messages palatable for
+        /// reporting in a tool using the Dynamic C Sharp library
         /// </summary>
-
-        public bool HasErrors
+        
+        public IEnumerable<string> Errors
         {
             get
             {
-                return Diagnostics.Any
-                    (d => d.Severity == DiagnosticSeverity.Error || d.IsWarningAsError);
+                if(Diagnostics != null)
+                    foreach(Diagnostic err in Diagnostics.Where(d => IsError(d)))
+                    {
+                        string msg = string.Empty; //= err.GetMessage();
+                        if (err.Location != Location.None && err.Location.IsInSource)
+                        {
+                            FileLinePositionSpan flps = err.Location.GetLineSpan();
+                            if(flps.IsValid)
+                            {
+                                int line = flps.StartLinePosition.Line + 1;
+                                int col = flps.StartLinePosition.Character;
+                                msg = $"{line}({col}):";
+                            }
+                        }
+                        yield return $"{msg,11} {err.GetMessage()}";
+                    }
             }
         }
 
-        private List<MetadataReference> metaDataReferences;
+        /// <summary>
+        /// True if the compilation raised any errors
+        /// </summary>
+
+        public bool HasErrors => Diagnostics.Any(d => IsError(d));
+
+        private static bool IsError(Diagnostic d) =>
+            d.Severity == DiagnosticSeverity.Error || d.IsWarningAsError;
+
+        private readonly List<MetadataReference> metaDataReferences;
 
         // Make the constructor private to force all creation to
         // go via the factory method. This in turn ensures users
         // get access to an ICompiler rather than a Compiler
 
-        private Compiler()
-        {
-            metaDataReferences = new List<MetadataReference>();
-        }
+        private Compiler() => metaDataReferences = new ();
 
         private void GenerateSyntaxTree()
         {
@@ -247,21 +267,17 @@ namespace DynamicCSharp
 
         private void EmitAssembly(bool dbgMode = false)
         {
-            using (var outputStream = new MemoryStream())
-            {
-                using (var debugStream = new MemoryStream())
-                {
-                    Compilation.Emit(outputStream, debugStream);
-                    outputStream.Flush();
-                    outputStream.Seek(0, SeekOrigin.Begin);
-                    debugStream.Flush();
-                    debugStream.Seek(0, SeekOrigin.Begin);
-                    if (dbgMode)
-                        Assembly = AssemblyLoadContext.Default.LoadFromStream(outputStream, debugStream);
-                    else
-                        Assembly = AssemblyLoadContext.Default.LoadFromStream(outputStream);
-                }
-            }
+            using var outputStream = new MemoryStream();
+            using var debugStream = new MemoryStream();
+            Compilation.Emit(outputStream, debugStream);
+            outputStream.Flush();
+            outputStream.Seek(0, SeekOrigin.Begin);
+            debugStream.Flush();
+            debugStream.Seek(0, SeekOrigin.Begin);
+            if (dbgMode)
+                Assembly = AssemblyLoadContext.Default.LoadFromStream(outputStream, debugStream);
+            else
+                Assembly = AssemblyLoadContext.Default.LoadFromStream(outputStream);
         }
     }
 }

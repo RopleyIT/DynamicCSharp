@@ -1,14 +1,12 @@
 using DynamicCSharp;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
-using System.IO;
-using System.Linq;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace DynamicCSharpTests
 {
+    [TestClass]
     public class CompilerClass
     {
         private readonly string source = @"
@@ -25,7 +23,7 @@ namespace DynamicCSharpTests
                     }
                 }";
 
-        private SyntaxTree CreateSyntaxTree()
+        private static SyntaxTree CreateSyntaxTree()
         {
             var compilationUnit = SF
                 .CompilationUnit()
@@ -37,7 +35,7 @@ namespace DynamicCSharpTests
 
             var ns = SF
                 .NamespaceDeclaration(SF.IdentifierName("SynTreeFred"));
-            
+
             var cls = SF
                 .ClassDeclaration("Henry")
                 .AddModifiers(SF.Token(SyntaxKind.PublicKeyword));
@@ -82,93 +80,94 @@ namespace DynamicCSharpTests
             return compilationUnit.SyntaxTree;
         }
 
-        [Fact]
+        [TestMethod]
         public void Constructs()
         {
             ICompiler c = Compiler.Create();
             c.AssemblyName = "Assem1";
-            Assert.IsType<Compiler>(c);
+            Assert.IsInstanceOfType(c, typeof(Compiler));
         }
 
-        [Fact]
+        [TestMethod]
         public void AddsAReferenceToAType()
         {
             ICompiler c = Compiler.Create();
             c.AssemblyName = "Assem2";
             c.AddReference(typeof(object));
-            Assert.IsType<Compiler>(c);
+            Assert.IsInstanceOfType(c, typeof(Compiler));
         }
 
-        [Fact]
+        [TestMethod]
         public void AddsAReferenceByTypeName()
         {
             ICompiler c = Compiler.Create();
             c.AssemblyName = "Assem3";
             c.AddReference("System.IO.Path");
-            Assert.IsType<Compiler>(c);
+            Assert.IsInstanceOfType(c, typeof(Compiler));
         }
 
-        [Fact]
+        [TestMethod]
         public void AddsAReferenceByAssemblyName()
         {
             ICompiler c = Compiler.Create();
             c.AssemblyName = "Assem3A";
             c.AddAssemblyReference("System.IO");
-            Assert.IsType<Compiler>(c);
+            Assert.IsInstanceOfType(c, typeof(Compiler));
         }
 
-        [Fact]
+        [TestMethod]
         public void AddsALocalReferenceByAssemblyName()
         {
             ICompiler c = Compiler.Create();
             c.AssemblyName = "Assem3A";
             c.AddAssemblyReference("DynamicCSharp");
-            Assert.IsType<Compiler>(c);
+            Assert.IsInstanceOfType(c, typeof(Compiler));
         }
 
-        [Fact]
+        [TestMethod]
         public void AddsAListOfReferencesByTypeName()
         {
             ICompiler c = Compiler.Create();
             c.AssemblyName = "Assem4";
             c.AddReferences(new string[] { "System.Int32", "System.Double", "System.IO.Path" });
-            Assert.IsType<Compiler>(c);
+            Assert.IsInstanceOfType(c, typeof(Compiler));
         }
 
-        [Fact]
+        [TestMethod]
         public void AddsAListOfReferencesByAssemblyName()
         {
             ICompiler c = Compiler.Create();
             c.AssemblyName = "Assem4A";
             c.AddAssemblyReferences(new string[] { "System", "System.IO", "System.XML" });
-            Assert.IsType<Compiler>(c);
+            Assert.IsInstanceOfType(c, typeof(Compiler));
         }
 
-        [Fact]
+        [TestMethod]
         public void ThrowsExceptionOnAddingBadReference()
         {
             ICompiler c = Compiler.Create();
             c.AssemblyName = "Assem5";
-            Assert.Throws<TypeLoadException>(() => c.AddReference("xyzzy"));
+            Assert.ThrowsException<TypeLoadException>
+                (() => c.AddReference("xyzzy"));
         }
 
-        [Fact]
+        [TestMethod]
         public void GeneratesSyntaxTreeFromSource()
         {
             ICompiler c = Compiler.Create();
             c.AssemblyName = "Assem6";
             c.Source = source;
             c.Compile();
-            Assert.NotNull(c.SyntaxTree);
+            Assert.IsNotNull(c.SyntaxTree);
             var root = c.SyntaxTree.GetCompilationUnitRoot();
-            Assert.NotNull(root);
-            Assert.Equal(SyntaxKind.CompilationUnit, root.Kind());
-            Assert.Single(root.Members);
-            Assert.Single(root.Usings);
-            Assert.Equal("System", root.Usings.First().Name.ToString());
+            Assert.IsNotNull(root);
+            Assert.AreEqual(SyntaxKind.CompilationUnit, root.Kind());
+            Assert.AreEqual(1, root.Members.Count);
+            Assert.AreEqual(1, root.Usings.Count);
+            Assert.AreEqual("System", root.Usings.First().Name.ToString());
         }
 
-        [Fact]
+        [TestMethod]
         public void GeneratesCompilation()
         {
             ICompiler c = Compiler.Create();
@@ -176,11 +175,11 @@ namespace DynamicCSharpTests
             c.Source = source;
             c.Compile();
             var cp = c.Compilation;
-            Assert.NotNull(cp);
-            Assert.Equal("Assem7", cp.AssemblyName);
+            Assert.IsNotNull(cp);
+            Assert.AreEqual("Assem7", cp.AssemblyName);
         }
 
-        [Fact]
+        [TestMethod]
         public void GeneratesCompilationWithReferences()
         {
             ICompiler c = Compiler.Create();
@@ -189,12 +188,12 @@ namespace DynamicCSharpTests
             c.Source = source;
             c.Compile();
             var cp = c.Compilation;
-            Assert.NotNull(cp);
-            Assert.Equal("Assem8", cp.AssemblyName);
-            Assert.Equal(3, cp.References.Count());
+            Assert.IsNotNull(cp);
+            Assert.AreEqual("Assem8", cp.AssemblyName);
+            Assert.AreEqual(3, cp.References.Count());
         }
 
-        [Fact]
+        [TestMethod]
         public void EmitsAssembly()
         {
             ICompiler c = Compiler.Create();
@@ -202,12 +201,14 @@ namespace DynamicCSharpTests
             c.AddReferences(new string[] { "System.Int32", "System.Double", "System.IO.Path" });
             c.Source = source;
             c.Compile();
-            Assert.NotNull(c.Assembly);
-            Assert.Equal("Joe", c.Assembly.DefinedTypes.First().Name);
-            Assert.Equal("Fred", c.Assembly.ExportedTypes.First().Namespace);
+            Assert.IsNotNull(c.Assembly);
+            Assert.IsTrue(c.Assembly.DefinedTypes
+                .Select(t => t.Name).Contains("Joe"));
+            Assert.IsTrue(c.Assembly.ExportedTypes
+                .Select(t => t.Namespace).Contains("Fred"));
         }
 
-        [Fact]
+        [TestMethod]
         public void CanInvokeEmittedMethods()
         {
             ICompiler c = Compiler.Create();
@@ -217,14 +218,14 @@ namespace DynamicCSharpTests
             c.Compile();
             Type type = c.Assembly.ExportedTypes.Where(t => t.Name == "Joe").FirstOrDefault();
             var joe = Activator.CreateInstance(type);
-            Assert.IsType(type, joe);
+            Assert.IsInstanceOfType(joe, type);
             var getNextInt = (Func<int>)Delegate
                 .CreateDelegate(typeof(Func<int>), joe, type.GetMethod("GetNextInt"));
-            Assert.Equal(1, getNextInt());
-            Assert.Equal(2, getNextInt());
+            Assert.AreEqual(1, getNextInt());
+            Assert.AreEqual(2, getNextInt());
         }
 
-        [Fact]
+        [TestMethod]
         public void CanUseAssemblyFromSourceFile()
         {
             ICompiler c = Compiler.Create();
@@ -239,14 +240,14 @@ namespace DynamicCSharpTests
             File.Delete(tmpFile);
             Type type = c.Assembly.ExportedTypes.Where(t => t.Name == "Joe").FirstOrDefault();
             var joe = Activator.CreateInstance(type);
-            Assert.IsType(type, joe);
+            Assert.IsInstanceOfType(joe, type);
             var getNextInt = (Func<int>)Delegate
                 .CreateDelegate(typeof(Func<int>), joe, type.GetMethod("GetNextInt"));
-            Assert.Equal(1, getNextInt());
-            Assert.Equal(2, getNextInt());
+            Assert.AreEqual(1, getNextInt());
+            Assert.AreEqual(2, getNextInt());
         }
 
-        [Fact]
+        [TestMethod]
         public void CanUseAssemblyFromSyntaxTree()
         {
             ICompiler c = Compiler.Create();
@@ -256,15 +257,15 @@ namespace DynamicCSharpTests
             c.Compile();
             Type type = c.Assembly.ExportedTypes.Where(t => t.Name == "Henry").FirstOrDefault();
             var joe = Activator.CreateInstance(type);
-            Assert.IsType(type, joe);
+            Assert.IsInstanceOfType(joe, type);
             var getNextInt = (Func<int>)Delegate
                 .CreateDelegate(typeof(Func<int>), joe, type.GetMethod("GetNextInt"));
-            Assert.Equal(13, getNextInt());
-            Assert.Equal(14, getNextInt());
+            Assert.AreEqual(13, getNextInt());
+            Assert.AreEqual(14, getNextInt());
         }
 
-        private readonly string badSource = @"
-                using System;
+        private readonly string badSource =
+                @"using System;
                 namespace Fred
                 {
                     public class Joe
@@ -277,7 +278,7 @@ namespace DynamicCSharpTests
                     }
                 }";
 
-        [Fact]
+        [TestMethod]
         public void CatchesErrors()
         {
             ICompiler c = Compiler.Create();
@@ -285,9 +286,23 @@ namespace DynamicCSharpTests
             c.AddReferences(new string[] { "System.Int32", "System.Double", "System.IO.Path" });
             c.Source = badSource;
             c.Compile();
-            Assert.True(c.HasErrors);
-            Assert.Null(c.Assembly);
-            Assert.Equal(2, c.Diagnostics.Count());
+            Assert.IsTrue(c.HasErrors);
+            Assert.IsNull(c.Assembly);
+            Assert.AreEqual(2, c.Diagnostics.Count());
+        }
+
+        [TestMethod]
+        public void ErrorsAreMeaningFul()
+        {
+            ICompiler c = Compiler.Create();
+            c.AssemblyName = "Assem11";
+            c.AddReferences(new string[] { "System.Int32", "System.Double", "System.IO.Path" });
+            c.Source = badSource;
+            c.Compile();
+            Assert.IsTrue(c.HasErrors);
+            Assert.IsNull(c.Assembly);
+            Assert.AreEqual(1, c.Errors.Count());
+            Assert.AreEqual("     7(46): ) expected", c.Errors.First());
         }
     }
 }
