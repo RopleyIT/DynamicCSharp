@@ -1,10 +1,10 @@
 ﻿# DynamicCSharp
 ## Overview
 DynamicCSharp is a small library designed for use 
-on .NET Core 2.1 or later. With the Windows implementation
+on .NET 5 or later. With the Windows implementation
 of the .NET framework, we could use CodeDom classes to
 parse C# source code and compile it to a dynamically-loaded
-assembly. With .NET core, these classes are replaced by the
+assembly. With .NET 5, these classes are replaced by the
 Roslyn compiler API, a complex suite of classes that support
 syntax tree generation and semantic analysis in addition to
 emitting output assemblies.
